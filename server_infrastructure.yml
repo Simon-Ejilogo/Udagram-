@@ -33,8 +33,8 @@ Resources:
           !Sub "${EnvironmentName}-VPCID"
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 8080
-        ToPort: 8080
+        FromPort: 80
+        ToPort: 80
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
         FromPort: 22
@@ -57,14 +57,14 @@ Resources:
           systemctl enable httpd
           systemctl start apache2.service
           cd /var/www/html
-          aws s3 cp s3://udagramproject/html.zip . 
-          unzip -o html.zip  
+          aws s3 cp https://udapeople-simonbucket.s3.amazonaws.com/index.html
+        #  / unzip -o html.zip  
           
                   
       # ToDo: AMI ID of Ubuntu Linux machine. Too get one, try creating a VM from the web console. 
       ImageId: ami-0729e439b6769d6ab
       # ToDo: Change the key-pair name, as applicable to you. 
-      KeyName: mykey
+      # KeyName:
       SecurityGroups:
       - Ref: WebServerSecGroup
       InstanceType: t3.medium
@@ -122,7 +122,7 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 8
       HealthyThresholdCount: 2
-      Port: 8080
+      Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId: 
