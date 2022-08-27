@@ -1,6 +1,7 @@
 version: 2.1
 
 commands:
+            # DESTROY ENVIRONMENT 
   destroy-environment:
     description: delete stacks on failure
     parameters:
@@ -19,6 +20,10 @@ commands:
             aws cloudformation delete-stack \
               --stack-name udapeople-frontend-<< parameters.workflow-id >> \
               --region us-east-1  
+   
+   
+      # REVERSE MIGRATION
+      
   reverse-migration:
     description: Reverse migration on failure response
     parameters:
@@ -36,8 +41,14 @@ commands:
               cd ~/project/backend
               npm install
               npm run migrations:revert
-            fi         
+            fi     
+
+
+
+    # JOBS SECTION
+
 jobs:
+       # FRONTEND BUILD
   build-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -54,6 +65,10 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+
+
+      # BACKEND BULID
+
   build-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -70,6 +85,10 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+
+
+    # TESTS SECTION
+
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -83,6 +102,7 @@ jobs:
             cd frontend
             npm install
             npm run test
+
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -96,6 +116,10 @@ jobs:
             cd backend
             npm install
             npm run test
+
+
+      # SCAN SECTION
+
   scan-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -112,6 +136,7 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --force
             npm audit --audit-level=critical --force
+
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -125,6 +150,10 @@ jobs:
             cd backend
             npm install
             npm audit fix --audit-level=critical --force
+
+
+        # DEPLOY INFRASTRUCTION
+
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -162,6 +191,10 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+
+
+    # CONFIGURE INFRASTRUCTURE
+      
   configure-infrastructure:
     docker:
       - image: python:3.9.0-alpine
@@ -189,6 +222,10 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment:
           workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+
+   #RUN MIGRATION
+    
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
@@ -221,6 +258,12 @@ jobs:
             fi
       - reverse-migration:
           workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+
+
+
+     # DEPLOY FRONTEND
+
   deploy-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -259,6 +302,10 @@ jobs:
           workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - reverse-migration:
           workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+
+    # DEPLOY BACKEND
+
   deploy-backend:
     docker:
       - image: python:3.7-alpine3.11
@@ -291,6 +338,12 @@ jobs:
           workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - reverse-migration:
           workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+
+
+
+   # SMOKE TEST
+
   smoke-test:
     docker:
       - image: amazon/aws-cli
@@ -333,6 +386,10 @@ jobs:
           workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - reverse-migration:
           workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+
+     # UPDATE CLOUDFRONT
+
   cloudfront-update:
     docker:
       - image: amazon/aws-cli
@@ -362,6 +419,9 @@ jobs:
               --tags project=udapeople
       - reverse-migration:
           workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+
+
+          # CLEANUP DEPLOYMENT
           
   cleanup:
     docker:
@@ -385,7 +445,11 @@ jobs:
             else
               echo "$OldWorkflowID==Udapoeple-$CurrentWorkflowID => nothing needs to be done..."
             fi
-workflows:    #workflows
+
+
+         # JOBS WORKFLOWS
+
+workflows:   
   default:
     jobs:
       - build-frontend
